@@ -4,7 +4,7 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "my-first-worker",
+	"name": "signal",
 	"main": "src/index.js",
 	"compatibility_date": "2025-09-27",
 	"observability": {
@@ -28,7 +28,7 @@
 		{
 			"binding": "DB",
 			"database_name": "cloudflare-signal-db",
-			"database_id": "YOUR_DATABASE_ID_HERE"
+			"database_id": "a79a0766-22b2-4cea-b907-d0548e474a2f"
 		}
 	],
 	/**
