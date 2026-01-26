@@ -166,6 +166,10 @@ Provide your analysis in JSON format with these EXACT fields:
 		// Store in D1 database if available
 		if (env.DB) {
 			try {
+				// Use feedback_priority for feedback type, null for bugs
+				const feedbackPriority = analysis.type === 'feedback' ? (analysis.priority || (title ? 'medium' : 'low')) : null;
+				const generalPriority = analysis.type === 'bug' ? null : (analysis.priority || (title ? 'medium' : 'low'));
+				
 				const feedbackData = {
 					title: title || text?.substring(0, 100) || 'Untitled',
 					description: text || title || '',
@@ -173,16 +177,16 @@ Provide your analysis in JSON format with these EXACT fields:
 					timestamp: new Date().toISOString(),
 					tags: analysis.suggestedTags || [],
 					status: 'new',
-					priority: title ? 'medium' : 'low',
+					priority: generalPriority, // This goes to the priority column in DB
 					type: analysis.type,
 					theme: analysis.theme,
 					severity: analysis.severity,
-					priority: analysis.priority, // This will be used for feedback_priority
 					userTier: analysis.userTier,
 					sentiment: analysis.sentiment,
 					keyPoints: analysis.keyPoints,
 					suggestedTags: analysis.suggestedTags,
 					summary: analysis.summary,
+					feedback_priority: feedbackPriority, // This goes to the feedback_priority column in DB
 				};
 				await storeFeedbackInD1(env.DB, feedbackData);
 			} catch (dbError) {
@@ -504,6 +508,15 @@ async function storeFeedbackInD1(db, feedback) {
 		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`);
 
+	// D1 schema has two separate columns:
+	// - priority: only for feedback (bugs use severity instead)
+	// - feedback_priority: only for feedback (duplicated for convenient querying/analytics)
+	const generalPriority = feedback.type === 'bug' ? null : (feedback.priority ?? null);
+	const feedbackPriority =
+		feedback.type === 'feedback'
+			? (feedback.feedback_priority ?? feedback.priority ?? null)
+			: null;
+
 	await stmt.bind(
 		feedback.title,
 		feedback.description,
@@ -511,11 +524,11 @@ async function storeFeedbackInD1(db, feedback) {
 		feedback.timestamp || new Date().toISOString(),
 		typeof feedback.tags === 'string' ? feedback.tags : JSON.stringify(feedback.tags || []),
 		feedback.status || 'new',
-		feedback.priority || null,
+		generalPriority,
 		feedback.type,
 		feedback.theme,
 		feedback.severity || null,
-		feedback.priority || null, // This is feedback_priority
+		feedbackPriority,
 		feedback.userTier || 'Unknown',
 		feedback.sentiment || 'neutral',
 		JSON.stringify(feedback.keyPoints || []),
