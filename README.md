@@ -1,4 +1,4 @@
-# Cloudflare Signal - Product Feedback Dashboard
+# Signal - Product Feedback Dashboard
 
 A modern, beautiful dashboard built with React, Vite, and Shadcn/UI for managing product feedback. Powered by **Cloudflare Workers AI** for intelligent feedback analysis.
 
