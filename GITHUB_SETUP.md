@@ -15,7 +15,7 @@ git init
 git add .
 
 # 3. Create initial commit
-git commit -m "Initial commit: Cloudflare Signal dashboard with Workers AI"
+git commit -m "Initial commit: Signal dashboard with Workers AI"
 
 # 4. Create repository on GitHub and push
 gh repo create my-first-worker --public --source=. --remote=origin --push
@@ -45,7 +45,7 @@ git init
 git add .
 
 # Create initial commit
-git commit -m "Initial commit: Cloudflare Signal dashboard with Workers AI"
+git commit -m "Initial commit: Signal dashboard with Workers AI"
 
 # Add GitHub repository as remote (replace YOUR_USERNAME with your GitHub username)
 git remote add origin https://github.com/YOUR_USERNAME/my-first-worker.git

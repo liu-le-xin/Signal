@@ -17,7 +17,7 @@ const Sidebar = () => {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <LayoutDashboard className="h-5 w-5" />
           </div>
-          <span className="text-lg font-semibold">Cloudflare Signal</span>
+          <span className="text-lg font-semibold">Signal</span>
         </div>
       </div>
       <nav className="flex-1 space-y-1 p-4">

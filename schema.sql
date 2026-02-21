@@ -1,4 +1,4 @@
--- Cloudflare Signal Feedback Database Schema
+-- Signal Feedback Database Schema
 -- Run this with: npx wrangler d1 execute cloudflare-signal-db --local --file=./schema.sql
 
 CREATE TABLE IF NOT EXISTS feedbacks (

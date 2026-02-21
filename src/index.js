@@ -1,5 +1,5 @@
 /**
- * Cloudflare Signal - Workers AI Feedback Analysis
+ * Signal - Workers AI Feedback Analysis
  * 
  * This worker uses Cloudflare Workers AI to analyze customer feedback texts.
  * 
@@ -49,7 +49,7 @@ export default {
 
 		// Health check
 		if (url.pathname === '/health') {
-			return new Response(JSON.stringify({ status: 'ok', service: 'Cloudflare Signal AI' }), {
+			return new Response(JSON.stringify({ status: 'ok', service: 'Signal AI' }), {
 				headers: { ...corsHeaders, 'Content-Type': 'application/json' },
 			});
 		}
@@ -57,7 +57,7 @@ export default {
 		// Default response
 		return new Response(
 			JSON.stringify({ 
-				message: 'Cloudflare Signal AI Worker',
+				message: 'Signal AI Worker',
 				endpoints: ['/api/analyze', '/api/analyze-batch', '/health']
 			}),
 			{ headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -671,7 +671,7 @@ async function handleDownloadFeedbacks(request, env, corsHeaders) {
 		const result = await stmt.all();
 		
 		// Format as TXT
-		let txtContent = `Cloudflare Signal - Feedback Export\n`;
+		let txtContent = `Signal - Feedback Export\n`;
 		txtContent += `Generated: ${new Date().toISOString()}\n`;
 		if (theme) txtContent += `Theme: ${theme}\n`;
 		if (type) txtContent += `Type: ${type}\n`;

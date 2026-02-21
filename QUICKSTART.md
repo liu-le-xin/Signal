@@ -1,4 +1,4 @@
-# Quick Start Guide - Cloudflare Signal with Workers AI
+# Quick Start Guide - Signal with Workers AI
 
 ## Step 1: Install Dependencies
 
