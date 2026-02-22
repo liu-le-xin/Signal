@@ -47,6 +47,10 @@ export default {
 			return handleDownloadFeedbacks(request, env, corsHeaders);
 		}
 
+		if (url.pathname === '/api/feedbacks/import' && request.method === 'POST') {
+			return handleImportFeedbacks(request, env, corsHeaders);
+		}
+
 		// Health check
 		if (url.pathname === '/health') {
 			return new Response(JSON.stringify({ status: 'ok', service: 'Signal AI' }), {
@@ -622,7 +626,63 @@ async function handleGetFeedbacks(request, env, corsHeaders) {
 			{
 				status: 500,
 				headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-			}
+		}
+	);
+	}
+}
+
+/**
+ * Import feedbacks into D1 (bulk insert from export/migration).
+ * Body: { feedbacks: Array } - each item same shape as GET /api/feedbacks (id optional).
+ */
+async function handleImportFeedbacks(request, env, corsHeaders) {
+	try {
+		if (!env.DB) {
+			return new Response(
+				JSON.stringify({ error: 'D1 database not configured' }),
+				{ status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+			);
+		}
+		const { feedbacks: rawFeedbacks } = await request.json();
+		if (!Array.isArray(rawFeedbacks) || rawFeedbacks.length === 0) {
+			return new Response(
+				JSON.stringify({ error: 'Body must be { feedbacks: Array } with at least one item' }),
+				{ status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+			);
+		}
+		let imported = 0;
+		for (const row of rawFeedbacks) {
+			const a = row.analysis || {};
+			const feedback = {
+				title: row.title || 'Untitled',
+				description: row.description || '',
+				author: row.author || 'system',
+				timestamp: row.timestamp || new Date().toISOString(),
+				tags: row.tags || [],
+				status: row.status || 'new',
+				priority: row.priority ?? (a.priority ?? null),
+				type: a.type || row.type || 'feedback',
+				theme: a.theme || row.theme || 'general',
+				severity: a.severity || row.severity || null,
+				feedback_priority: a.priority ?? row.feedback_priority ?? null,
+				userTier: a.userTier || row.user_tier || 'Unknown',
+				sentiment: a.sentiment || row.sentiment || 'neutral',
+				keyPoints: a.keyPoints || row.key_points || [],
+				suggestedTags: a.suggestedTags || row.suggested_tags || [],
+				summary: a.summary || row.summary || '',
+			};
+			await storeFeedbackInD1(env.DB, feedback);
+			imported++;
+		}
+		return new Response(
+			JSON.stringify({ imported, total: rawFeedbacks.length }),
+			{ headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+		);
+	} catch (error) {
+		console.error('Import feedbacks error:', error);
+		return new Response(
+			JSON.stringify({ error: 'Failed to import feedbacks', message: error.message }),
+			{ status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
 		);
 	}
 }

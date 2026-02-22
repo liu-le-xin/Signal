@@ -90,6 +90,21 @@ npm run build
 npm run preview
 ```
 
+### Copying data between deployments
+
+If you have an existing deployment with data (e.g. **cloudflare-signal.pages.dev**) and a new frontend (e.g. **signalplatform.pages.dev**) that uses a **different** Worker with an empty D1:
+
+1. **Deploy this Worker** (with the new `POST /api/feedbacks/import` endpoint) to the account/Worker that backs the new site.
+2. Run the migration script (use the Worker URLs, not the Pages URLs):
+   ```bash
+   SOURCE_WORKER_URL=https://your-old-worker.xxx.workers.dev \
+   TARGET_WORKER_URL=https://your-new-worker.xxx.workers.dev \
+   node scripts/migrate-feedbacks.js
+   ```
+3. In the **Cloudflare Pages** project for the new site, set **VITE_WORKER_URL** to the target Worker URL, then redeploy.
+
+If both frontends use the **same** Worker (same backend), you don’t need the script: set **VITE_WORKER_URL** on the new Pages project to that Worker URL and redeploy so the new site shows the same data.
+
 ## Project Structure
 
 ```
@@ -154,6 +169,11 @@ The Cloudflare Worker provides the following endpoints:
   ```
 
 - `POST /api/analyze-batch` - Analyze multiple feedback texts
+
+- `POST /api/feedbacks/import` - Bulk import feedbacks (for migration between Workers). Body: `{ "feedbacks": [ ... ] }` (same shape as `GET /api/feedbacks`).
+
+- `GET /api/feedbacks` - List feedbacks (optional query: `theme`, `type`, `limit`).
+
   ```json
   {
     "feedbacks": [
